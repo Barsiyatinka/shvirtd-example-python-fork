@@ -1,40 +1,45 @@
-version: "3.8"
+include:
+  - ./proxy.yaml
 
 services:
-  app:
+
+  db:
+    image: mysql:8.0
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      backend:
+        ipv4_address: 172.20.0.10
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  web:
     build:
       context: .
       dockerfile: Dockerfile.python
-    image: myapp:dev
-    ports:
-      - "5000:5000"
-    environment:
-      # Подставьте реальные значения или используйте .env (см. ниже)
-      - DATABASE_HOST=mysql
-      - DATABASE_PORT=3306
-      - DATABASE_USER=root
-      - DATABASE_PASSWORD=YtReWq4321
-      - DATABASE_NAME=virtd
-      - TABLE_NAME=${TABLE_NAME:-my_table}
+    container_name: web
+    restart: always
     depends_on:
-      mysql:
+      db:
         condition: service_healthy
-    restart: unless-stopped
-
-  mysql:
-    image: mysql:8.0
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=appdb
-      - MYSQL_USER=appuser
-      - MYSQL_PASSWORD=apppassword
-    volumes:
-      - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      DB_HOST: db
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+    networks:
+      backend:
+        ipv4_address: 172.20.0.5
 
 volumes:
-  mysql-data:
+  db_data:
