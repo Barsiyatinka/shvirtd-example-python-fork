@@ -8,5 +8,4 @@ __pycache__
 .vscode
 .idea
 schema.pdf
-haproxy/
-nginx/
+

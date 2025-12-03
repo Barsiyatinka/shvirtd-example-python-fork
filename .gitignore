@@ -39,3 +39,6 @@ Thumbs.db
 
 # Local env files
 .env
+
+# other
+/!important

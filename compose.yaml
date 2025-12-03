@@ -18,7 +18,8 @@ services:
       backend:
         ipv4_address: 172.20.0.10
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      #test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"]
       interval: 2s
       timeout: 2s
       retries: 30
